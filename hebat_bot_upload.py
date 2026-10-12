@@ -9,7 +9,7 @@ PASSWORD = os.getenv("HEBAT_PASSWORD")
 # Mengambil data dari environment variable (bisa dari .env lokal atau GitHub Secrets)
 URL_MATKUL = os.getenv("HEBAT_URL_MATKUL")
 NAMA_TUGAS = os.getenv("HEBAT_NAMA_TUGAS")
-FILE_TUGAS = "file_tugas/PrakSO_I4_Week5_187251063.pdf"
+FILE_TUGAS = "file_tugas/PrakSO_I4_Week8_187251063.pdf"
 
 def run_upload_bot():
     if not os.path.exists(FILE_TUGAS):
