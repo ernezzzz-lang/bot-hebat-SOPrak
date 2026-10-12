@@ -63,9 +63,19 @@ def run_upload_bot():
         print("[INFO] Link tugas ditemukan, menunggu halaman tugas terbuka penuh...")
         page.wait_for_load_state("networkidle")
 
-        print("cari button 'Add submission' or 'Edit submission'...")
-        selector_submission = "button:has-text('submission'), input[value*='submission'], a:has-text('submission')"
+        print("cari button 'Add submission', 'Edit submission', atau 'Tambahkan pengajuan'...")
+        # Kita gabungkan pencarian dalam bahasa Inggris dan bahasa Indonesia
+        selector_submission = (
+            "button:has-text('submission'), "
+            "input[value*='submission'], "
+            "a:has-text('submission'), "
+            "button:has-text('pengajuan'), "
+            "input[value*='pengajuan'], "
+            "a:has-text('pengajuan')"
+        )
         
+        page.wait_for_selector(selector_submission, timeout=15000)
+        tombol_submission = page.locator(selector_submission).first
         # Menyuruh bot menunggu sampai tombolnya benar-benar muncul di memori server
         page.wait_for_selector(selector_submission, timeout=15000)
         tombol_submission = page.locator(selector_submission).first
