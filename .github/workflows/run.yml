@@ -2,8 +2,9 @@ name: HEBAT Auto Upload Tugas
 
 on:
   schedule:
-    - cron: '0 0 * * 2' # Setiap Selasa jam 07:00 WIB
-  workflow_dispatch:
+    # 00:55 UTC setiap hari Selasa = 06:55 WIB setiap hari Selasa
+    - cron: '55 0 * * 2'
+  workflow_dispatch: # Tombol manual tetap ada untuk jaga-jaga
 
 jobs:
   build:
@@ -30,6 +31,5 @@ jobs:
         HEBAT_PASSWORD: ${{ secrets.HEBAT_PASSWORD }}
         HEBAT_URL_MATKUL: ${{ secrets.HEBAT_URL_MATKUL }}
         HEBAT_NAMA_TUGAS: ${{ secrets.HEBAT_NAMA_TUGAS }}
-        HEBAT_FILE_TUGAS: ${{ secrets.HEBAT_FILE_TUGAS }}
       run: |
         python hebat_bot_upload.py
