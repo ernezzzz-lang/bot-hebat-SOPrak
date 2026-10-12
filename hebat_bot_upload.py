@@ -6,9 +6,10 @@ load_dotenv()
 USERNAME = os.getenv("HEBAT_USERNAME")
 PASSWORD = os.getenv("HEBAT_PASSWORD")
 
-URL_MATKUL = "https://hebat.elearning.unair.ac.id/course/view.php?id=10988"
-NAMA_TUGAS = "Pengumpulan Modul Prak Lab 5 NDG Linux Essential"
-FILE_TUGAS = "file_tugas/PrakSO_I4_Week5_187251063.pdf"
+# Mengambil data dari environment variable (bisa dari .env lokal atau GitHub Secrets)
+URL_MATKUL = os.getenv("HEBAT_URL_MATKUL")
+NAMA_TUGAS = os.getenv("HEBAT_NAMA_TUGAS")
+FILE_TUGAS = os.getenv("HEBAT_FILE_TUGAS")
 
 def run_upload_bot():
     if not os.path.exists(FILE_TUGAS):

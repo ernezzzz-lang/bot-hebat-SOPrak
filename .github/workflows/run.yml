@@ -2,10 +2,8 @@ name: HEBAT Auto Upload Tugas
 
 on:
   schedule:
-    # Jadwal dalam format UTC (Waktu Indonesia Barat / WIB adalah UTC+7)
-    # Jam 07:00 WIB sama dengan jam 00:00 UTC setiap hari Selasa
-    - cron: '0 0 * * 2'
-  workflow_dispatch: # Memungkinkan kamu menjalankan bot secara manual kapan saja dari web GitHub
+    - cron: '0 0 * * 2' # Setiap Selasa jam 07:00 WIB
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,5 +28,8 @@ jobs:
       env:
         HEBAT_USERNAME: ${{ secrets.HEBAT_USERNAME }}
         HEBAT_PASSWORD: ${{ secrets.HEBAT_PASSWORD }}
+        HEBAT_URL_MATKUL: ${{ secrets.HEBAT_URL_MATKUL }}
+        HEBAT_NAMA_TUGAS: ${{ secrets.HEBAT_NAMA_TUGAS }}
+        HEBAT_FILE_TUGAS: ${{ secrets.HEBAT_FILE_TUGAS }}
       run: |
         python hebat_bot_upload.py
