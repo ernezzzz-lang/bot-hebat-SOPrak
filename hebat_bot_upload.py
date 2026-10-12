@@ -63,29 +63,27 @@ def run_upload_bot():
         print("[INFO] Link tugas ditemukan, menunggu halaman tugas terbuka penuh...")
         page.wait_for_load_state("networkidle")
 
-        print("cari button 'Add submission', 'Edit submission', atau 'Tambahkan pengajuan'...")
-        # Kita gabungkan pencarian dalam bahasa Inggris dan bahasa Indonesia
-        selector_submission = (
-            "button:has-text('submission'), "
-            "input[value*='submission'], "
-            "a:has-text('submission'), "
-            "button:has-text('pengajuan'), "
-            "input[value*='pengajuan'], "
-            "a:has-text('pengajuan')"
-        )
+        print("mencari tombol pengumpulan tugas...")
         
-        page.wait_for_selector(selector_submission, timeout=15000)
-        tombol_submission = page.locator(selector_submission).first
-        # Menyuruh bot menunggu sampai tombolnya benar-benar muncul di memori server
-        page.wait_for_selector(selector_submission, timeout=15000)
-        tombol_submission = page.locator(selector_submission).first
+        # Beri jeda 5 detik agar halaman benar-benar stabil dimuat
+        page.wait_for_timeout(5000)
         
-        if tombol_submission.is_visible():
-            print("klik button submission...")
+        # Coba cari tombol berdasarkan beberapa kemungkinan teks umum di Moodle (baik Inggris maupun Indonesia)
+        tombol_submission = None
+        kemungkinan_teks = ["submission", "pengajuan", "Add submission", "Edit submission", "Tambahkan pengajuan", "Edit pengajuan"]
+        
+        for teks in kemungkinan_teks:
+            elemen = page.locator(f"text={teks}").first
+            if elemen.count() > 0 and elemen.is_visible():
+                print(f"[INFO] Ketemu tombol dengan teks: '{teks}'")
+                tombol_submission = elemen
+                break
+        
+        if tombol_submission and tombol_submission.is_visible():
+            print("klik tombol submission...")
             tombol_submission.click()
             page.wait_for_load_state("domcontentloaded")
 
-       
             print("nunggu pop up file manager...")
             page.wait_for_selector('.filemanager', timeout=15000)
             
@@ -93,26 +91,22 @@ def run_upload_bot():
             page.locator('.fp-btn-add, a[title="Add..."]').first.click()
             
             print("nunggu pop-up File picker keluar...")
-      
             page.get_by_text("Upload a file").first.wait_for(state="visible", timeout=10000)
             
             print("makesure tab 'Upload a file' diklik...")
             page.get_by_text("Upload a file").first.click()
             
             print("nunggu form upload siap...")
-
             page.locator('input[name="repo_upload_file"]').wait_for(state="attached", timeout=10000)
             
             print("input file tugas langsung ke sistem...")
-    
             page.locator('input[name="repo_upload_file"]').set_input_files(FILE_TUGAS)
             
             print("klik 'Upload this file'...")
             page.locator('button:has-text("Upload this file")').click()
 
-            print("nunggu loading upload masuk ke filemanager (10 seconds)...")
+            print("nunggu loading upload masuk ke filemanager (5 seconds)...")
             page.wait_for_timeout(5000)
-            
 
             print("klik 'Save changes'...")
             page.get_by_role("button", name="Save changes").click()
@@ -121,7 +115,7 @@ def run_upload_bot():
             print("[SUCCESS] tugas terkumpul!")
             page.screenshot(path="screenshots/bukti_kumpul_tugas.png", full_page=True)
         else:
-            print("[FAILED] tombol add/edit submission ga ditemuka.")
+            print("[FAILED] tombol add/edit submission ga ditemukno.")
 
         print("\n closing browser in 5 seconds...")
         page.wait_for_timeout(5000)
