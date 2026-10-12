@@ -50,8 +50,8 @@ def run_upload_bot():
                 tugas_ditemukan = True
                 break
             else:
-                print(f"[{i+1}/{maksimal_refresh_matkul}] Link tugas blom aktif. Refresh dalam 5 detik...")
-                page.wait_for_timeout(5000) # Jeda 5 detik tiap refresh agar tidak memberatkan server
+                print(f"[{i+1}/{maksimal_refresh_matkul}] Link tugas blom aktif. Refresh dalam 2 detik...")
+                page.wait_for_timeout(2000) # Jeda 5 detik tiap refresh agar tidak memberatkan server
                 page.reload()
                 page.wait_for_load_state("domcontentloaded")
 
