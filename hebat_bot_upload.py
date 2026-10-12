@@ -64,11 +64,11 @@ def run_upload_bot():
         page.wait_for_load_state("networkidle")
 
         print("mencari tombol pengumpulan tugas...")
-        
-        # Beri jeda 5 detik agar halaman benar-benar stabil dimuat
         page.wait_for_timeout(5000)
         
-        # Coba cari tombol berdasarkan beberapa kemungkinan teks umum di Moodle (baik Inggris maupun Indonesia)
+        # Ambil screenshot halaman saat gagal mendeteksi tombol untuk dianalisis
+        page.screenshot(path="screenshots/debug_halaman_tugas.png", full_page=True)
+        
         tombol_submission = None
         kemungkinan_teks = ["submission", "pengajuan", "Add submission", "Edit submission", "Tambahkan pengajuan", "Edit pengajuan"]
         
@@ -116,6 +116,12 @@ def run_upload_bot():
             page.screenshot(path="screenshots/bukti_kumpul_tugas.png", full_page=True)
         else:
             print("[FAILED] tombol add/edit submission ga ditemukno.")
+            # Cetak seluruh teks yang ada di halaman ke terminal untuk didiagnosis
+            print("Isi halaman saat ini:", page.inner_text("body")[:500])
+
+        print("\n closing browser in 5 seconds...")
+        page.wait_for_timeout(5000)
+        browser.close()
 
         print("\n closing browser in 5 seconds...")
         page.wait_for_timeout(5000)
