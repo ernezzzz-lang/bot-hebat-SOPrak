@@ -60,8 +60,15 @@ def run_upload_bot():
             browser.close()
             return
       
+        print("[INFO] Link tugas ditemukan, menunggu halaman tugas terbuka penuh...")
+        page.wait_for_load_state("networkidle")
+
         print("cari button 'Add submission' or 'Edit submission'...")
-        tombol_submission = page.locator("button:has-text('submission')")
+        selector_submission = "button:has-text('submission'), input[value*='submission'], a:has-text('submission')"
+        
+        # Menyuruh bot menunggu sampai tombolnya benar-benar muncul di memori server
+        page.wait_for_selector(selector_submission, timeout=15000)
+        tombol_submission = page.locator(selector_submission).first
         
         if tombol_submission.is_visible():
             print("klik button submission...")
