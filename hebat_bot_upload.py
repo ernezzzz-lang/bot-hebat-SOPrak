@@ -17,9 +17,7 @@ def run_upload_bot():
         return
 
     with sync_playwright() as p:
-        # Jika berjalan di GitHub Actions (CI=true), otomatis jadikan True. Kalau di laptop, bisa False.
-        is_ci = os.getenv("CI") == "true"
-        browser = p.chromium.launch(headless=is_ci)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
      
@@ -35,23 +33,25 @@ def run_upload_bot():
         page.goto(URL_MATKUL)
         page.wait_for_load_state("domcontentloaded")
         
-        print(f"cari link tugas: '{NAMA_TUGAS}'...")
+        print(f"cari link tugas yang mengandung kata: '{NAMA_TUGAS}'...")
        
-        link_tugas = page.locator(f"a:has-text('{NAMA_TUGAS}')")
+        # Menggunakan pencarian berbasis teks parsial yang lebih fleksibel
+        link_tugas = page.get_by_role("link", name=NAMA_TUGAS, exact=False)
         
-        maksimal_refresh_matkul = 100 
+        maksimal_refresh_matkul = 60 # Kita buat 60 kali (total 5 menit penantian)
         tugas_ditemukan = False
 
         for i in range(maksimal_refresh_matkul):
+            # Cek apakah link tugas sudah muncul dan bisa diklik
             if link_tugas.count() > 0 and link_tugas.first.is_visible():
-                print(f"[INFO] Link tugas '{NAMA_TUGAS}' udah aktif!")
+                print(f"[INFO] Link tugas '{NAMA_TUGAS}' udah aktif dan ketemu!")
                 link_tugas.first.click()
                 page.wait_for_load_state("domcontentloaded")
                 tugas_ditemukan = True
                 break
             else:
-                print(f"[{i+1}/{maksimal_refresh_matkul}] Link tugas blom aktif.  refresh in 5 seconds...")
-                page.wait_for_timeout(1000)
+                print(f"[{i+1}/{maksimal_refresh_matkul}] Link tugas blom aktif. Refresh dalam 5 detik...")
+                page.wait_for_timeout(5000) # Jeda 5 detik tiap refresh agar tidak memberatkan server
                 page.reload()
                 page.wait_for_load_state("domcontentloaded")
 
@@ -60,15 +60,8 @@ def run_upload_bot():
             browser.close()
             return
       
-        print("[INFO] Link tugas ditemukan, menunggu halaman tugas terbuka penuh...")
-        page.wait_for_load_state("networkidle")
-
         print("cari button 'Add submission' or 'Edit submission'...")
-        selector_submission = "button:has-text('submission'), input[value*='submission'], a:has-text('submission')"
-        
-        # Menyuruh bot menunggu sampai tombolnya benar-benar muncul di memori server
-        page.wait_for_selector(selector_submission, timeout=15000)
-        tombol_submission = page.locator(selector_submission).first
+        tombol_submission = page.locator("button:has-text('submission')")
         
         if tombol_submission.is_visible():
             print("klik button submission...")
