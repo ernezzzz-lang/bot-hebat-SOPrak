@@ -17,7 +17,9 @@ def run_upload_bot():
         return
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        # Jika berjalan di GitHub Actions (CI=true), otomatis jadikan True. Kalau di laptop, bisa False.
+        is_ci = os.getenv("CI") == "true"
+        browser = p.chromium.launch(headless=is_ci)
         context = browser.new_context()
         page = context.new_page()
      
