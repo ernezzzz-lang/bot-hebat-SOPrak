@@ -1,0 +1,111 @@
+from playwright.sync_api import sync_playwright
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+USERNAME = os.getenv("HEBAT_USERNAME")
+PASSWORD = os.getenv("HEBAT_PASSWORD")
+
+URL_MATKUL = "https://hebat.elearning.unair.ac.id/course/view.php?id=10988"
+NAMA_TUGAS = "Pengumpulan Modul Prak Lab 5 NDG Linux Essential"
+FILE_TUGAS = "file_tugas/PrakSO_I4_Week5_187251063.pdf"
+
+def run_upload_bot():
+    if not os.path.exists(FILE_TUGAS):
+        print(f"[ERROR] File {FILE_TUGAS} gurung onok nang folder.")
+        return
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        context = browser.new_context()
+        page = context.new_page()
+     
+        print("otw buka hebat...")
+        page.goto("https://hebat.elearning.unair.ac.id/")
+        page.get_by_role("link", name="Login").click()
+        page.locator("#username").fill(USERNAME)
+        page.locator("#password").fill(PASSWORD)
+        page.locator("#loginbtn").click()
+        page.wait_for_load_state("domcontentloaded")
+       
+        print(f"masuk page matkul: {URL_MATKUL}")
+        page.goto(URL_MATKUL)
+        page.wait_for_load_state("domcontentloaded")
+        
+        print(f"cari link tugas: '{NAMA_TUGAS}'...")
+       
+        link_tugas = page.locator(f"a:has-text('{NAMA_TUGAS}')")
+        
+        maksimal_refresh_matkul = 100 
+        tugas_ditemukan = False
+
+        for i in range(maksimal_refresh_matkul):
+            if link_tugas.count() > 0 and link_tugas.first.is_visible():
+                print(f"[INFO] Link tugas '{NAMA_TUGAS}' udah aktif!")
+                link_tugas.first.click()
+                page.wait_for_load_state("domcontentloaded")
+                tugas_ditemukan = True
+                break
+            else:
+                print(f"[{i+1}/{maksimal_refresh_matkul}] Link tugas blom aktif.  refresh in 5 seconds...")
+                page.wait_for_timeout(1000)
+                page.reload()
+                page.wait_for_load_state("domcontentloaded")
+
+        if not tugas_ditemukan:
+            print("[GAGAL] timeout. tugas ga ditemukan.")
+            browser.close()
+            return
+      
+        print("cari button 'Add submission' or 'Edit submission'...")
+        tombol_submission = page.locator("button:has-text('submission')")
+        
+        if tombol_submission.is_visible():
+            print("klik button submission...")
+            tombol_submission.click()
+            page.wait_for_load_state("domcontentloaded")
+
+       
+            print("nunggu pop up file manager...")
+            page.wait_for_selector('.filemanager', timeout=15000)
+            
+            print("klik ikon 'Add...'...")
+            page.locator('.fp-btn-add, a[title="Add..."]').first.click()
+            
+            print("nunggu pop-up File picker keluar...")
+      
+            page.get_by_text("Upload a file").first.wait_for(state="visible", timeout=10000)
+            
+            print("makesure tab 'Upload a file' diklik...")
+            page.get_by_text("Upload a file").first.click()
+            
+            print("nunggu form upload siap...")
+
+            page.locator('input[name="repo_upload_file"]').wait_for(state="attached", timeout=10000)
+            
+            print("input file tugas langsung ke sistem...")
+    
+            page.locator('input[name="repo_upload_file"]').set_input_files(FILE_TUGAS)
+            
+            print("klik 'Upload this file'...")
+            page.locator('button:has-text("Upload this file")').click()
+
+            print("nunggu loading upload masuk ke filemanager (10 seconds)...")
+            page.wait_for_timeout(5000)
+            
+
+            print("klik 'Save changes'...")
+            page.get_by_role("button", name="Save changes").click()
+            page.wait_for_load_state("domcontentloaded")
+
+            print("[SUCCESS] tugas terkumpul!")
+            page.screenshot(path="screenshots/bukti_kumpul_tugas.png", full_page=True)
+        else:
+            print("[FAILED] tombol add/edit submission ga ditemuka.")
+
+        print("\n closing browser in 5 seconds...")
+        page.wait_for_timeout(5000)
+        browser.close()
+
+if __name__ == "__main__":
+    run_upload_bot()
