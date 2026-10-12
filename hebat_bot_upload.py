@@ -36,7 +36,7 @@ def run_upload_bot():
         print(f"cari link tugas yang mengandung kata: '{NAMA_TUGAS}'...")
        
         # Menggunakan pencarian berbasis teks parsial yang lebih fleksibel
-        link_tugas = page.get_by_role("link", name=Pendalaman, exact=False)
+        link_tugas = page.get_by_role("link", name=NAMA_TUGAS, exact=False)
         
         maksimal_refresh_matkul = 60 # Kita buat 60 kali (total 5 menit penantian)
         tugas_ditemukan = False
